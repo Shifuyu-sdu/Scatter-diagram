@@ -1,0 +1,46 @@
+ggplot(df, aes(x = urea, y = protein_intake,color = breed)) + 
+  geom_point() +
+  geom_smooth(method = "lm")+
+  geom_point(color = "grey50",size = 1, alpha = 0.6)
+#回归线
+#添加回归曲线
+
+
+############################################
+#散点图
+p <- ggplot(df, aes(urea, protein_intake)) + 
+  geom_point() +
+  geom_smooth(method = "lm")+
+  geom_point(color = "grey50",size = 1, alpha = 0.6)
+#回归线
+#添加回归曲线
+p + stat_smooth(color = "skyblue", fill = "skyblue", method = "lm")+  ylim(0,6) + xlim(25,115)
+
+p + 
+  stat_smooth(color = "skyblue", formula = y ~ x,fill = "skyblue", method = "lm") +
+  stat_poly_eq(
+    aes(label = paste(..eq.label.., ..adj.rr.label.., sep = '~~~~')),
+    formula = y ~ x,  parse = TRUE,
+    size = 5, #公式字体大小
+    label.x = 0.1,  #位置 ，0-1之间的比例
+    label.y = 0.95)
+#上述方差表中的行名，列名，以及NA，，，稍加调整后，看起来更“专业”！
+
+p +  ylim(0,6) + xlim(30,105) +
+  stat_smooth(color = "skyblue", formula = y ~ x,fill = "skyblue", method = "lm") +
+  stat_poly_eq(
+    aes(label = paste(..eq.label.., ..adj.rr.label.., sep = '~~~~')),
+    formula = y ~ x,  parse = TRUE,size = 4,label.x = 0.1, label.y = 0.95) +
+  stat_fit_tb(method = "lm",
+              method.args = list(formula = y ~ x),
+              tb.type = "fit.anova",
+              tb.vars = c(Effect = "term", 
+                          "df",
+                          "M.S." = "meansq", 
+                          "italic(F)" = "statistic", 
+                          "italic(P)" = "p.value"),
+              label.y = 0.95, label.x = 0.1,
+              size = 4,
+              parse = TRUE
+  ) +
+  theme_classic() 
