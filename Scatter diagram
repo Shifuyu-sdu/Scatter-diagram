@@ -1,0 +1,46 @@
+df$dose <- as.factor(df$dose)
+head(df, 3)
+library(dplyr)
+df.summary <- df %>%
+  group_by(dose) %>%
+  summarise(
+    se = se(len, na.rm = TRUE),
+    len = weighted.mean(len,n.o)
+  )
+df.summary
+# Initialize ggplot with data
+f <- ggplot(
+  df.summary, 
+  aes(x = dose, y = len, ymin = len-se, ymax = len+se)
+)
+# Vertical line with point in the middle
+f + geom_pointrange()
+
+# Standard error bars
+f + geom_errorbar(width = 0.2) +
+  geom_point(size = 1.5)
+# Horizontal error bars with mean points
+# Change the color by groups
+ggplot(df.summary, aes(x = len, y = dose, xmin = len-se, xmax = len+se)) +
+  geom_point() +
+  geom_errorbarh(height=.2)
+# Combine with jitter points
+ggplot(df, aes(dose, len)) +
+  geom_jitter(position = position_jitter(0.2), color = "darkgray") + 
+  geom_pointrange(aes(ymin = len-se, ymax = len+se),data = df.summary)+ # Add pairwise comparisons p-value
+  stat_compare_means(label.y =80)
+
+# Combine with violin plots
+ggplot(df, aes(dose, len)) +
+  geom_violin(color = "darkgray", trim = FALSE) +  geom_sina(alpha=0.5,size=2,color="black")+
+  geom_pointrange(aes(ymin = len-se, ymax = len+se), data = df.summary)
+ggerrorplot(df, x = "dose", y = "len",
+            desc_stat = "mean_sd", color = "black",
+            add = "violin", add.params = list(color = "darkgray"))+ 
+  stat_compare_means(comparisons = my_comparisons)+ # Add pairwise comparisons p-value
+  stat_compare_means(label.y =20)  +                  # Add global p-value
+  geom_sina(alpha=0.5,size=2,color="black")
+ggbarplot(df, x = "dose", y = "len", 
+          add = c("mean_se", "jitter"),
+          palette = "jco",
+          position = position_dodge(0.8), ylim = c(0, 15))
